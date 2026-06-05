@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет — Анализатор шахматных партий</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="upload-section" style="margin-bottom: 20px;">
+        <h1>Личный кабинет</h1>
+        <p class="subtitle">Пользователь: <strong>{{ user.username }}</strong></p>
+        <p class="subtitle">
+            Тариф:
+            {% if user.is_premium %}
+                <strong>Premium</strong>
+            {% else %}
+                <strong>Бесплатный</strong>
+            {% endif %}
+        </p>
+        <a href="/logout" class="btn-secondary" style="text-decoration: none; display: inline-block;">Выйти</a>
+    </div>
+
+    {% if not user.is_premium %}
+    <div class="message">
+        Бесплатный тариф: можно загрузить не более 10 партий за один раз.
+    </div>
+    {% endif %}
+
+    <div class="upload-section">
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".pgn" required>
+            <br>
+            <button type="submit" class="btn-primary">
+                Загрузить и проанализировать
+            </button>
+        </form>
+
+        {% if total > 0 %}
+        <form action="/clear" method="post" style="margin-top: 10px;">
+            <button type="submit" class="btn-secondary">
+                Очистить данные
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if message %}
+    <div class="message success">{{ message }}</div>
+    {% endif %}
+
+    {% if error %}
+    <div class="message error">{{ error }}</div>
+    {% endif %}
+
+    {% if total > 0 %}
+
+    <div class="stats-header">
+        <h2>Загружено партий: {{ total }}</h2>
+    </div>
+
+    <div class="charts-section">
+        <div class="chart-box">
+            <h3>Распределение результатов</h3>
+            <canvas id="pieChart"></canvas>
+        </div>
+
+        <div class="chart-box">
+            <h3>Сравнение результатов</h3>
+            <canvas id="barChart"></canvas>
+        </div>
+    </div>
+
+    {% if top_openings %}
+    <div class="table-section">
+        <h3>Топ-5 популярных дебютов</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Дебют</th>
+                    <th>Количество партий</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for opening in top_openings %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ opening.opening }}</td>
+                    <td>{{ opening.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="table-section">
+    <h3>Все загруженные партии</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Белые</th>
+                <th>Чёрные</th>
+                <th>Результат</th>
+                <th>Дата</th>
+                <th>Дебют</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for game in all_games %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ game.white_player }}</td>
+                <td>{{ game.black_player }}</td>
+                <td>{{ game.result }}</td>
+                <td>{{ game.game_date or "—" }}</td>
+                <td>{{ game.opening_name or "—" }}</td>
+                <td>
+                    <a href="/game/{{ game.id }}" class="btn-secondary" style="text-decoration: none; display: inline-block;">
+                        Открыть
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+    {% endif %}
+
+</div>
+
+{% if total > 0 %}
+<div
+    id="chart-data"
+    data-white-wins="{{ distribution.white_wins }}"
+    data-black-wins="{{ distribution.black_wins }}"
+    data-draws="{{ distribution.draws }}"
+    style="display: none;"
+></div>
+
+<script>
+    const chartDataElement = document.getElementById('chart-data');
+
+    const whiteWins = Number(chartDataElement.dataset.whiteWins);
+    const blackWins = Number(chartDataElement.dataset.blackWins);
+    const draws = Number(chartDataElement.dataset.draws);
+
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Победы белых', 'Победы чёрных', 'Ничьи'],
+            datasets: [{
+                data: [whiteWins, blackWins, draws],
+                backgroundColor: ['#f0f0f0', '#333333', '#888888'],
+                borderColor: '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Победы белых', 'Победы чёрных', 'Ничьи'],
+            datasets: [{
+                label: 'Количество партий',
+                data: [whiteWins, blackWins, draws],
+                backgroundColor: ['#f0f0f0', '#333333', '#888888'],
+                borderColor: ['#cccccc', '#111111', '#666666'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+
+</body>
+</html>

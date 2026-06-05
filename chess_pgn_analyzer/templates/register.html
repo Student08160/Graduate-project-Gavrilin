@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация — Анализатор шахматных партий</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="upload-section" style="max-width: 500px; margin: 60px auto;">
+        <h1>Регистрация</h1>
+        <p class="subtitle">Создайте новый аккаунт</p>
+
+        {% if message %}
+        <div class="message success">{{ message }}</div>
+        {% endif %}
+
+        {% if error %}
+        <div class="message error">{{ error }}</div>
+        {% endif %}
+
+        <form action="/register" method="post">
+            <input type="text" name="username" placeholder="Логин" required style="width: 100%; padding: 10px; margin-bottom: 10px;">
+            <input type="password" name="password" placeholder="Пароль" required style="width: 100%; padding: 10px; margin-bottom: 15px;">
+            <button type="submit" class="btn-primary" style="width: 100%;">Зарегистрироваться</button>
+        </form>
+
+        <p style="margin-top: 15px; text-align: center;">
+            Уже есть аккаунт? <a href="/login">Войти</a>
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

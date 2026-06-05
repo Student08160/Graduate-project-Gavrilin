@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр партии</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+<link rel="stylesheet"
+      href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="upload-section" style="margin-bottom: 20px;">
+        <h1>Просмотр партии</h1>
+        <p class="subtitle">
+            <strong>{{ game.white_player }}</strong> — <strong>{{ game.black_player }}</strong>
+        </p>
+        <p class="subtitle">
+            Результат: <strong>{{ game.result }}</strong>
+            {% if game.opening_name %}
+                | Дебют: <strong>{{ game.opening_name }}</strong>
+            {% endif %}
+        </p>
+
+        <a href="/" class="btn-secondary" style="text-decoration: none; display: inline-block;">
+            Назад в личный кабинет
+        </a>
+    </div>
+
+    <div class="table-section" style="text-align: center;">
+        <div id="board" style="width: 420px; margin: 0 auto 20px auto;"></div>
+
+        <p id="moveCounter" style="margin-bottom: 15px; font-weight: bold;">
+            Ход 0
+        </p>
+
+         <p id="engineEval" style="margin-bottom: 15px; font-weight: bold; color: #d9534f;">
+            Оценка движка: -
+        </p>
+
+        <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-secondary" onclick="goToStart()">⏮ В начало</button>
+            <button class="btn-secondary" onclick="prevMove()">◀ Назад</button>
+            <button class="btn-secondary" onclick="nextMove()">Вперёд ▶</button>
+            <button class="btn-secondary" onclick="goToEnd()">В конец ⏭</button>
+        </div>
+    </div>
+
+    <div class="table-section">
+        <h3>PGN партии</h3>
+        <pre style="white-space: pre-wrap; font-family: Consolas, monospace; font-size: 13px;">{{ game.pgn_text }}</pre>
+    </div>
+</div>
+
+<div id="pgn-data" data-pgn="{{ game.pgn_text | e }}" data-game-id="{{ game.id }}" style="display: none;"></div>
+
+<script>
+    const pgnContainer = document.getElementById("pgn-data");
+    const pgnText = pgnContainer.dataset.pgn;
+    const gameId = Number(pgnContainer.dataset.gameId);
+
+    const chessGame = new Chess();
+    chessGame.load_pgn(pgnText);
+
+    const moves = chessGame.history();
+
+    const replayGame = new Chess();
+
+    const board = Chessboard('board', {
+        position: 'start',
+        pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+    });
+
+    let currentMove = 0;
+
+            async function fetchEvaluation(fen) {
+        document.getElementById("engineEval").innerText = "Оценка движка: думаю...";
+        try {
+            const response = await fetch('/api/evaluate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fen: fen,
+                    game_id: gameId,
+                    move_number: currentMove
+                })
+            });
+            const data = await response.json();
+            document.getElementById("engineEval").innerText = "Оценка движка: " + data.score;
+        } catch (error) {
+            document.getElementById("engineEval").innerText = "Оценка движка: ошибка связи";
+        }
+    }
+
+    function updateBoard() {
+        replayGame.reset();
+
+        for (let i = 0; i < currentMove; i++) {
+            replayGame.move(moves[i]);
+        }
+
+        const currentFen = replayGame.fen();
+        board.position(currentFen);
+        
+        document.getElementById("moveCounter").innerText =
+            "Ход " + currentMove + " из " + moves.length;
+            
+        // Вызываем оценку движком
+        fetchEvaluation(currentFen);
+    }
+
+    function nextMove() {
+        if (currentMove < moves.length) {
+            currentMove++;
+            updateBoard();
+        }
+    }
+
+    function prevMove() {
+        if (currentMove > 0) {
+            currentMove--;
+            updateBoard();
+        }
+    }
+
+    function goToStart() {
+        currentMove = 0;
+        updateBoard();
+    }
+
+    function goToEnd() {
+        currentMove = moves.length;
+        updateBoard();
+    }
+
+    updateBoard();
+</script>
+
+</body>
+</html>

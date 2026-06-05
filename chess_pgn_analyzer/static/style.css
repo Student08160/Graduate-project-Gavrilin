@@ -1,0 +1,170 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+h1 {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 8px;
+    color: #222;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 15px;
+}
+
+/* Секция загрузки */
+.upload-section {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.upload-section input[type="file"] {
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background-color: #2c2c2c;
+    color: #ffffff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary:hover {
+    background-color: #444;
+}
+
+.btn-secondary {
+    background-color: #ffffff;
+    color: #666;
+    border: 1px solid #ccc;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.btn-secondary:hover {
+    background-color: #f0f0f0;
+}
+
+/* Сообщения */
+.message {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.message.success {
+    background-color: #e6f4ea;
+    color: #2d6a4f;
+    border: 1px solid #b7dfbf;
+}
+
+.message.error {
+    background-color: #fdecea;
+    color: #b00020;
+    border: 1px solid #f5c2c7;
+}
+
+/* Заголовок статистики */
+.stats-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.stats-header h2 {
+    font-size: 20px;
+    color: #333;
+}
+
+/* Диаграммы */
+.charts-section {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+.chart-box {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    flex: 1;
+    min-width: 280px;
+    text-align: center;
+}
+
+.chart-box h3 {
+    font-size: 15px;
+    margin-bottom: 16px;
+    color: #444;
+}
+
+/* Таблицы */
+.table-section {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.table-section h3 {
+    font-size: 16px;
+    margin-bottom: 14px;
+    color: #333;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+thead tr {
+    background-color: #2c2c2c;
+    color: #ffffff;
+}
+
+thead th {
+    padding: 10px 12px;
+    text-align: left;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+}
