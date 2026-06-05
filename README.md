@@ -1,2 +1,2 @@
-# Graduate-progect-Gavrilin
+# Graduate-project-Gavrilin
 Репозиторий для дипломного проекта Гаврилина Александра Анатольевича.
